@@ -1,10 +1,10 @@
 # Scout Go SDK
 
-Official Go SDK for the [Scout](https://usescout.sh) web-intelligence API — search, scrape, screenshot, extract, crawl, and company enrichment.
+Official Go SDK for the [Scout](https://usescout.sh) web-intelligence API: search, scrape, screenshot, extract, crawl, and company enrichment.
 
-- **Zero dependencies.** Built entirely on the standard library (`net/http`, `encoding/json`).
-- **Idiomatic.** `context.Context`-first methods, functional options, a single error type.
-- **Resilient.** Automatic retries with backoff + jitter, configurable timeouts, idempotency keys.
+- Built on the standard library (`net/http`, `encoding/json`).
+- `context.Context`-first methods, functional options, and a single error type.
+- Automatic retries with backoff and jitter, configurable timeouts, and idempotency keys on writes.
 
 ## Requirements
 
@@ -18,7 +18,7 @@ go get github.com/Scout-AI-Labs/scout-go
 
 ## Authentication
 
-Create an API key in the [Scout dashboard](https://usescout.sh). The client reads `SCOUT_API_KEY` from the environment by default:
+Generate an API key at [platform.usescout.sh/settings](https://platform.usescout.sh/settings). The client reads `SCOUT_API_KEY` from the environment by default:
 
 ```go
 client := scout.NewClient()                         // uses SCOUT_API_KEY
@@ -79,7 +79,7 @@ logo, _ := client.Company.Logo(ctx, &scout.LogoParams{Domain: "stripe.com", Form
 crawl, _ := client.Site.Crawl(ctx, &scout.SiteCrawlParams{StartURL: "https://example.com", MaxPages: scout.Int(50)})
 ```
 
-Optional fields are pointers — set them with the `scout.String`/`scout.Int`/`scout.Bool`/`scout.Float64` helpers, or leave them nil to omit.
+Optional fields are pointers; set them with the `scout.String`/`scout.Int`/`scout.Bool`/`scout.Float64` helpers, or leave them nil to omit.
 
 ## Error handling
 
@@ -114,7 +114,7 @@ if err != nil {
 
 ## Retries & timeouts
 
-Transient failures (connection errors, 408/409/429/5xx) are retried automatically — **2 times by default**, with exponential backoff + jitter, honoring `Retry-After`. Write methods send an auto-generated `Idempotency-Key`.
+Transient failures (connection errors, 408/409/429/5xx) are retried automatically, **2 times by default**, with exponential backoff and jitter, honoring `Retry-After`. Write methods send an auto-generated `Idempotency-Key`.
 
 ```go
 client := scout.NewClient(

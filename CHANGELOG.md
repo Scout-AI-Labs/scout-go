@@ -7,7 +7,7 @@ to [Semantic Versioning](https://semver.org/).
 
 Initial release.
 
-- Zero-dependency client built on the standard library (`net/http`, `encoding/json`).
+- Client built on the standard library (`net/http`, `encoding/json`).
 - Full coverage of the Scout REST API across `Search`, `Page`, `Extract`, `Company`, `Lists`, `Products`, `Site`, `Jobs`, `Monitors`, `Chat`.
 - `context.Context`-first methods, functional options (`WithAPIKey`, `WithBaseURL`, `WithTimeout`, `WithMaxRetries`, `WithHTTPClient`, `WithHeader`).
 - Single `*scout.Error` type plus `IsRateLimited`/`IsAuthentication`/... predicates.
