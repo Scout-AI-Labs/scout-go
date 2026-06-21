@@ -88,3 +88,8 @@ func (s *ListRunsService) Events(ctx context.Context, findallID string) (Result,
 	err := s.client.do(ctx, "GET", "/v1/lists/runs/"+url.PathEscape(findallID)+"/events", nil, nil, &out)
 	return out, err
 }
+
+// StreamEvents streams a find-all run's progress events live (SSE).
+func (s *ListRunsService) StreamEvents(ctx context.Context, findallID string) (*Stream, error) {
+	return s.client.openStream(ctx, "GET", "/v1/lists/runs/"+url.PathEscape(findallID)+"/events", nil)
+}

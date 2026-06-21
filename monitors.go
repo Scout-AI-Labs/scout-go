@@ -102,3 +102,8 @@ func (s *MonitorsService) Events(ctx context.Context, monitorID string) (Result,
 	err := s.client.do(ctx, "GET", "/v1/monitors/"+url.PathEscape(monitorID)+"/events", nil, nil, &out)
 	return out, err
 }
+
+// StreamEvents streams a monitor's events live (SSE).
+func (s *MonitorsService) StreamEvents(ctx context.Context, monitorID string) (*Stream, error) {
+	return s.client.openStream(ctx, "GET", "/v1/monitors/"+url.PathEscape(monitorID)+"/events", nil)
+}

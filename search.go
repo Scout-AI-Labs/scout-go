@@ -84,3 +84,8 @@ func (s *SearchService) Events(ctx context.Context, searchID string) (Result, er
 	err := s.client.do(ctx, "GET", "/v1/searches/"+url.PathEscape(searchID)+"/events", nil, nil, &out)
 	return out, err
 }
+
+// StreamEvents streams a deep-search run's progress events live (SSE).
+func (s *SearchService) StreamEvents(ctx context.Context, searchID string) (*Stream, error) {
+	return s.client.openStream(ctx, "GET", "/v1/searches/"+url.PathEscape(searchID)+"/events", nil)
+}

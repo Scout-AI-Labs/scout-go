@@ -138,6 +138,37 @@ if err := it.Err(); err != nil {
 }
 ```
 
+## Streaming
+
+Stream chat completions and live run progress (search, jobs, find-all, monitors) with a `*scout.Stream`:
+
+```go
+st, err := client.Chat.Completions.CreateStream(ctx, &scout.ChatParams{
+	Messages: []scout.ChatMessage{{Role: "user", Content: "Summarize EU AI regulation."}},
+	WebSearch: scout.Bool(true),
+})
+if err != nil {
+	log.Fatal(err)
+}
+defer st.Close()
+for st.Next() {
+	chunk := st.Current() // a scout.Result; read choices[0].delta.content
+	fmt.Println(chunk)
+}
+if err := st.Err(); err != nil {
+	log.Fatal(err)
+}
+
+// Live progress events:
+es, _ := client.Search.StreamEvents(ctx, searchID)
+defer es.Close()
+for es.Next() {
+	fmt.Println(es.Current()["type"])
+}
+```
+
+`StreamEvents` is also on `Jobs`, `Lists.Runs`, and `Monitors`. Cancel a stream via the `context.Context` you pass in.
+
 ## Versioning
 
 This SDK follows [SemVer](https://semver.org/) and sends the targeted Scout API version on every request; see [`CHANGELOG.md`](./CHANGELOG.md). API reference renders on [pkg.go.dev](https://pkg.go.dev/github.com/Scout-AI-Labs/scout-go).

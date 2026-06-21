@@ -37,3 +37,11 @@ func (s *ChatCompletionsService) Create(ctx context.Context, params *ChatParams)
 	err := s.client.do(ctx, "POST", "/v1/chat/completions", nil, params, &out)
 	return out, err
 }
+
+// CreateStream streams a chat completion as OpenAI-style chunk objects. Read
+// token text from each Current() result's choices[0].delta.content.
+func (s *ChatCompletionsService) CreateStream(ctx context.Context, params *ChatParams) (*Stream, error) {
+	p := *params
+	p.Stream = Bool(true)
+	return s.client.openStream(ctx, "POST", "/v1/chat/completions", &p)
+}

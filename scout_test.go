@@ -3,6 +3,7 @@ package scout
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"sync/atomic"
@@ -37,6 +38,16 @@ func TestEndToEnd(t *testing.T) {
 			json.NewEncoder(w).Encode(map[string]any{"detail": "invalid api key"})
 		case "/v1/searches":
 			json.NewEncoder(w).Encode(map[string]any{"items": []any{map[string]any{"id": 1}}})
+		case "/v1/chat/completions":
+			w.Header().Set("Content-Type", "text/event-stream")
+			io.WriteString(w, "data: {\"choices\":[{\"delta\":{\"content\":\"Hel\"}}]}\n\n")
+			io.WriteString(w, "data: {\"choices\":[{\"delta\":{\"content\":\"lo\"}}]}\n\n")
+			io.WriteString(w, "data: [DONE]\n\n")
+		case "/v1/searches/abc/events":
+			w.Header().Set("Content-Type", "text/event-stream")
+			io.WriteString(w, ": keepalive\n\n")
+			io.WriteString(w, "event: run.progress\ndata: {\"type\":\"run.progress\"}\n\n")
+			io.WriteString(w, "event: run.completed\ndata: {\"type\":\"run.completed\"}\n\n")
 		}
 	}))
 	defer srv.Close()
@@ -93,6 +104,41 @@ func TestEndToEnd(t *testing.T) {
 	}
 	if count != 1 {
 		t.Fatalf("expected 1 item, got %d", count)
+	}
+
+	// 5) chat completion stream
+	cs, err := c.Chat.Completions.CreateStream(ctx, &ChatParams{
+		Messages: []ChatMessage{{Role: "user", Content: "hi"}},
+	})
+	if err != nil {
+		t.Fatalf("create stream: %v", err)
+	}
+	var content string
+	for cs.Next() {
+		choices := cs.Current()["choices"].([]any)
+		delta := choices[0].(map[string]any)["delta"].(map[string]any)
+		content += delta["content"].(string)
+	}
+	cs.Close()
+	if cs.Err() != nil {
+		t.Fatalf("chat stream err: %v", cs.Err())
+	}
+	if content != "Hello" {
+		t.Fatalf("chat stream content: %q", content)
+	}
+
+	// 6) events stream
+	es, err := c.Search.StreamEvents(ctx, "abc")
+	if err != nil {
+		t.Fatalf("stream events: %v", err)
+	}
+	var types []string
+	for es.Next() {
+		types = append(types, es.Current()["type"].(string))
+	}
+	es.Close()
+	if len(types) != 2 || types[0] != "run.progress" || types[1] != "run.completed" {
+		t.Fatalf("events: %v", types)
 	}
 }
 

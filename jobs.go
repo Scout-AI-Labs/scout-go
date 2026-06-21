@@ -62,6 +62,11 @@ func (s *JobsService) Events(ctx context.Context, taskID string) (Result, error)
 	return out, err
 }
 
+// StreamEvents streams a job's progress events live (SSE).
+func (s *JobsService) StreamEvents(ctx context.Context, taskID string) (*Stream, error) {
+	return s.client.openStream(ctx, "GET", "/v1/jobs/"+url.PathEscape(taskID)+"/events", nil)
+}
+
 // StartRun starts a run for a job.
 func (s *JobsService) StartRun(ctx context.Context, body map[string]any) (Result, error) {
 	var out Result
